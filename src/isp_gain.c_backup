@@ -1,0 +1,98 @@
+#include "snx_isp/isp_lib_api.h"
+#include "snx_gpio.h"
+
+int main(int argc, char* argv[])
+{
+   int val, newval, error, firstflag=1, doset=1, satu, new_exp_time;
+
+   gpio_pin_info info;
+
+   snx_gpio_open(0);
+
+   info.pinumber = GPIO_PIN_0;
+   info.mode = 0;  // 0: input 1: output
+
+    while(1)
+    {
+
+    snx_gpio_read(&info);
+    sleep(1);
+    
+    printf ("%d\n",info.value);
+    if(firstflag)
+    {
+        firstflag = 0;
+        val = info.value;
+        if(info.value) //Day mode
+        {
+            newval = 128;
+           // new_exp_time = 0x493e0;    
+        }
+        else //night mode
+        {
+            newval = 350;
+            //new_exp_time = 0xfffff;
+        }
+        snx_isp_filter_saturation_get(&satu); //for mono mode
+        doset = 1;
+    }
+    else
+    {
+        if(val != info.value)
+        {
+            val = info.value;
+            if(info.value) //Day mode
+            {
+            newval = 128;    
+            //new_exp_time = 0x493e0;    
+            }
+            else //night mode
+            {
+            newval = 350;
+            //new_exp_time = 0xfffff;
+            }
+            doset = 1;
+        }else
+        {
+            doset = 0;    
+        }
+        
+    }
+    
+
+    
+        if(doset)
+        {
+      //      error = snx_isp_sensor_redGain_set(newval);
+
+        //    error = snx_isp_sensor_greenGain_set(newval);
+
+          //  error = snx_isp_sensor_blueGain_set(newval);
+
+        //    snx_isp_sensor_gain_set(newval);
+
+           // snx_isp_sensor_exposure_set(new_exp_time);
+
+            if(info.value)
+            {
+                snx_isp_filter_saturation_set(satu);
+                printf("saturation:%d  \n", satu);
+            }
+            else
+            {
+                snx_isp_filter_saturation_set(0); 
+                printf("saturation:%d  \n", 0);   
+            }
+
+    //        printf("new gain:%d  \n", newval);
+        }
+
+    }
+
+	
+	//snx_gpio_close();
+
+    return;
+}
+
+	 
